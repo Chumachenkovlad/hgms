@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 import math
 
 pi = math.pi
@@ -73,7 +75,8 @@ def mover(X, Y, Z):
     A3 = 32 * piGammaKsi2 * Zshift2 / U5
     A4 = 160 * piGammaKsi2 * G ** 2 / (9 * U6)
     A5 = 40 * piGammaKsi * H0B * G / (3 * U72)
-    A6 = 80 * pi2GammaKsipi * (Y2minusZ2 * G + 6 * Y2 * Z * Zshift) / (3 * Y2plusZ2 ** 2 * U72)
+    A6 = 80 * pi2GammaKsipi * \
+        (Y2minusZ2 * G + 6 * Y2 * Z * Zshift) / (3 * Y2plusZ2 ** 2 * U72)
     A7 = 160 * piGammaKsi2 * Y2plusZ2 * Zshift2 / U6
     A8 = 32 * pi2GammaKsipi * Y2minusZ2 / (3 * Y2plusZ2 ** 2 * U52)
 
@@ -83,7 +86,8 @@ def mover(X, Y, Z):
     B1 = 8 * pi * H0B / (Y2 + Z2) ** 2
     B2 = 128 * pi2 * (Y2minusZ2 ** 2 + Y2 * Z2) / Y2plusZ2 ** 5
     B3 = 16 * pi * H0B * Y2minusZ2 / (Y2 + Z2) ** 3
-    B4 = 64 * pi2GammaKsipi * Ksi * ((Y2 - Z2) * G + 6 * Y2 * Z * Zshift) / (3 * Y2plusZ2 ** 3 * U52)
+    B4 = 64 * pi2GammaKsipi * Ksi * \
+        ((Y2 - Z2) * G + 6 * Y2 * Z * Zshift) / (3 * Y2plusZ2 ** 3 * U52)
     B5 = 32 * pi2GammaKsipi / (3 * Y2plusZ2 ** 2 * U52)
 
     # print(B0, B1, B2, B3, B4, B5)
@@ -92,9 +96,10 @@ def mover(X, Y, Z):
     D2 = 2 * Zshift * Y2minusZ2 - 3 * Y2 * Zshift - 3 * Y2 * Z + Z * G
 
     gradHX = A1 * X - A2 * X + A3 * X - A4 * X + A8 * X + A5 * X - A7 * X - A6 * X
-    gradHY = B0 - B1 * Y - B2 * Y + B3 * Y + B5 * D1 + A1 * Y - A2 * Y + A3 * Y - A4 * Y + A5 * Y - B4 * Y - A6 * Y - A7 * Y
+    gradHY = B0 - B1 * Y - B2 * Y + B3 * Y + B5 * D1 + A1 * Y - \
+        A2 * Y + A3 * Y - A4 * Y + A5 * Y - B4 * Y - A6 * Y - A7 * Y
     gradHZ = B1 * Z - A0 - B2 * Z + B3 * Z - A4 * Zshift - B5 * D2 + A3 * (
-    X2 + Y2) / Zshift - 2 * A1 * Zshift + 2 * A2 * Zshift + A5 * Zshift - A6 * Zshift - A7 * Zshift - B4 * Z
+        X2 + Y2) / Zshift - 2 * A1 * Zshift + 2 * A2 * Zshift + A5 * Zshift - A6 * Zshift - A7 * Zshift - B4 * Z
 
     VX = gradHX * CB
     VY = gradHY * CB
@@ -115,7 +120,8 @@ def mover(X, Y, Z):
 def stopper(X, Y, Z):
     Gamma = d_constants['Gamma']
 
-    result = (math.sqrt(Y ** 2) > 1) and (math.sqrt(X ** 2 + Y ** 2 + (Z - Gamma - 1) ** 2) > Gamma)
+    result = (math.sqrt(Y ** 2) > 1) and (math.sqrt(X **
+                                                    2 + Y ** 2 + (Z - Gamma - 1) ** 2) > Gamma)
 
     return result
 
@@ -171,7 +177,8 @@ def roy(alpha, Z0, ry=0, rn=0):
         Y = R0 * sin_a
         Z = Z0
 
-        while stopper(X, Y, Z) and Z < Zlim: X, Y, Z = mover(X, Y, Z)
+        while stopper(X, Y, Z) and Z < Zlim:
+            X, Y, Z = mover(X, Y, Z)
 
         if Z >= Zlim:
             R_No = R0
@@ -231,7 +238,7 @@ def run(params):
     xy = []
     anglesRange = params['A_RANGE']
     Z = params['Z0']
-    global d_working_const;
+    global d_working_const
     d_working_const = {
         'DeltaR': params['DeltaR'],
         'ZT': params['ZT'],

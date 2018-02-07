@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 import chain_model as chain
 import listManager as lm
 
@@ -8,10 +10,10 @@ PARAMS = [
     {'Zlim': [40]},
     {'Spow': [0.5]},
     {'T': [0.5]},
-    {'A_RANGE':[[60]]},
+    {'A_RANGE': [[60]]},
     {'Hox': [0]},
     {'Hoz': [0]},
-    {'r0': [100,200]},
+    {'r0': [100, 200]},
     {'R0': [200]},
     {'ksi': [2]},
     {'Nu': [1.01 * 10 ** -2]},
@@ -40,6 +42,7 @@ def start():
         resultString = getParamsString(params)
         resultString += '{}  '.format(chain.run(params))
         print(resultString)
+
 
 if __name__ == "__main__":
     start()
