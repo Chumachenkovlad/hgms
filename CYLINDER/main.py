@@ -14,13 +14,7 @@ PARAMS = [
     {'r0': [25]},
     {'R0': [125]},
     {'Xu': [
-        10 ** -1,
-        10 ** -2,
-        10 ** -3,
-        10 ** -4,
-        10 ** -5,
-        10 ** -6,
-        10 ** 7
+        10 ** -1
     ]},
     {'Nu': [1.01 * 10 ** -2]},
     {'V0': [1.3]},
@@ -43,19 +37,19 @@ def getParamsString(params):
 def start():
     paramsLists = lm.manageLists(PARAMS)
 
+
+    print('r0(um)\tR0(um)\tXu\tH0(Gs)\tb(um)\tCatchingRadius(um)')
+    for params in paramsLists:
+        resultString = getParamsString(params)
+        resultString += '{}\t'.format(model.run(params))
+        print(resultString)
+
     """with open("results.txt", "w") as results_file:
         results_file.write('r0(um)\tR0(um)\tXu\tH0(Gs)\tb(um)\tCatchingRadius(um)\n')
         for params in paramsLists:
             resultString = getParamsString(params)
             resultString += '{}\t'.format(model.run(params))
             results_file.write(resultString + "\n")"""
-
-    
-    print('r0(um)\tR0(um)\tXu\tH0(Gs)\tb(um)\tCatchingRadius(um)')
-    for params in paramsLists:
-        resultString = getParamsString(params)
-        resultString += '{}\t'.format(model.run(params))
-        print(resultString)
 
 
 if __name__ == "__main__":
