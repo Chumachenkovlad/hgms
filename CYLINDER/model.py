@@ -17,7 +17,7 @@ def set_constants(**kw):
     M2 = float(kw['M2'])  # for elements
     H0 = float(kw['H0'])  # external magentic field
     r0 = float(kw['r0'])  # radius of element that lain on cylinder
-    R0 = float(kw['R0'])  # radius of cylinder
+    R0 = float(kw['R0'])  # radius of cylinder (equals to element radius)
     b = float(kw['b'])  # (3-7)*10**-6
     Nu = float(kw['Nu'])  # 1.01*10**-3 viscosity
     V0 = float(kw['V0'])  # speed of liquid
