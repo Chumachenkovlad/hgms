@@ -120,6 +120,7 @@ def tpl_integral(X, Y, Z):
     mR = d_constants['mR']  # (R0/r0)^2
     limX1 = math.sqrt(mR) * 0.99
     step = d_working_const['step']  # math.sqrt(mR)/10
+    step_volume = step ** 3
 
     """set a variation of X1,Y1,Z1 coors into vesicle"""
     for X1 in list(frange(-limX1, limX1, step)):
@@ -135,9 +136,9 @@ def tpl_integral(X, Y, Z):
                 """calculate fx,fz,fy for X1,Y1,Z1"""
                 dfx, dfy, dfz = f(X1, Y1, Z1, X, Y, Z)
 
-                i_gradHX += dfx
-                i_gradHY += dfy
-                i_gradHZ += dfz
+                i_gradHX += dfx * step_volume
+                i_gradHY += dfy * step_volume
+                i_gradHZ += dfz * step_volume
 
     return i_gradHX, i_gradHY, i_gradHZ
 
