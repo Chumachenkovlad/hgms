@@ -1,3 +1,4 @@
+from numba import jit
 import math
 pi = math.pi
 pi2 = math.pi ** 2
@@ -5,12 +6,15 @@ pi2 = math.pi ** 2
 d_constants = dict()  # working constants
 d_physical_const = dict()  # dict for physical parameters
 
+
+@jit
 def frange(start, stop, step=1.0):
     """ Generator that build range with float values """
     x = start
     while x < stop:
         yield round(x, 3)
         x += step
+
 
 def set_constants(**kw):
     """
@@ -51,7 +55,7 @@ def set_constants(**kw):
     d_constants['D'] = R0 / r0
 
 
-# @jit
+@jit
 def f(X1, Y1, Z1, X, Y, Z):
     """
     this function get:
@@ -107,7 +111,7 @@ def f(X1, Y1, Z1, X, Y, Z):
     return fx, fy, fz
 
 
-# @jit
+@jit
 def tpl_integral(X, Y, Z):
     """
     this function get coordinates of center of vesicule
@@ -119,7 +123,7 @@ def tpl_integral(X, Y, Z):
     i_gradHZ = 0
     mR = d_constants['mR']  # (R0/r0)^2
     limX1 = math.sqrt(mR) * 0.99
-    step = d_working_const['step']  # math.sqrt(mR)/10
+    step = limX1 * 2 / 15  # d_working_const['step']  # math.sqrt(mR)/10
     step_volume = step ** 3
 
     """set a variation of X1,Y1,Z1 coors into vesicle"""
@@ -143,7 +147,7 @@ def tpl_integral(X, Y, Z):
     return i_gradHX, i_gradHY, i_gradHZ
 
 
-# @jit
+@jit
 def mover(X, Y, Z):
     """
     this function get old coordinates of center of vesicule
@@ -184,7 +188,7 @@ def stopper(X, Y, Z):
     # vesicule in OZ axes direction movement
 
 
-# @jit
+@jit
 def pre_roy(alpha, Z0, ry=0, rn=0):
     """
     this function get
@@ -217,11 +221,12 @@ def pre_roy(alpha, Z0, ry=0, rn=0):
             return R0, R_Yes
 
         else:
+
             R_Yes = R0
             R0 = R0 * 1.34
 
 
-# @jit
+@jit
 def roy(alpha, Z0, ry=0, rn=0):
     Zlim = d_working_const['Zlim']
     DeltaR = d_working_const['DeltaR']
@@ -241,7 +246,8 @@ def roy(alpha, Z0, ry=0, rn=0):
         Y = R0 * sin_a
         Z = Z0
         
-        while stopper(X, Y, Z) and Z < N * delta * 1.2: X, Y, Z = mover(X, Y, Z)
+        while stopper(X, Y, Z) and Z < N * delta * 1.2:
+            X, Y, Z = mover(X, Y, Z)
 
         if Z > N * delta * 1.2:
             R_No = R0
@@ -291,10 +297,11 @@ def new_capar(Xi, Yi, Zi, n):
 
     return x, y, z, xy
 
+
 def run(params):
     A = params['A_RANGE']
     Z = params['Z0']
-    global d_working_const;
+    global d_working_const
     d_working_const = {
         'DeltaR': params['DeltaR'],
         'ZT':     params['ZT'],
@@ -322,7 +329,7 @@ def run(params):
     z = []
     r = []
     
-    x, y, z, r =  get_capture_area(Z, A)
+    x, y, z, r = get_capture_area(Z, A)
     catchR = sum(r) / len(r)
     toV = round(float(catchR) - params['R0'] / params['r0'], 2) * params['r0']
     return toV
