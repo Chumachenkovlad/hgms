@@ -335,12 +335,16 @@ def set_params(params):
     )
 
 def run(params):
-    x = []
-    y = []
-    z = []
-    r = []
-
+    # Z,A are global params
     x, y, z, r = get_capture_area(Z, A)
-    catchR = sum(r) / len(r)
-    toV = round(float(catchR) - params['R0'] / params['r0'], 2) * params['r0']
-    return toV
+    R, r = params['R0'], params['r0']
+    catchR = sum(r) / len(r) - R / r
+    distanceToVesicule = round(catchR, 2) * r
+    return distanceToVesicule
+
+def get_catching_distance_to_vesicule(params):
+    x, y, z, r = get_capture_area(Z, A)
+    R0, r0 = params['R0'], params['r0']
+    catchR = sum(r) / len(r) - R0 / r0
+    distanceToVesicule = round(catchR, 2) * r0
+    return distanceToVesicule
