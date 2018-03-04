@@ -40,7 +40,8 @@ def set_constants(**kw):
 
     global d_constants
 
-    CB = 4 * pi * ksi * r0 ** 2 * Mo ** 2 / (27 * Nu * R0 * V0)  # 4*pi*ksi*r0^2*Mo^2/(27*nu*R0)
+    CB = 4 * pi * ksi * r0 ** 2 * Mo ** 2 / \
+        (27 * Nu * R0 * V0)  # 4*pi*ksi*r0^2*Mo^2/(27*nu*R0)
     Ex = 3 * pi * Hox / (2 * Mo)
     Ez = 3 * pi * Hoz / (2 * Mo)
     Rm = (R0 / r0) ** 2
@@ -158,7 +159,9 @@ def mover(X, Y, Z):
     T = d_working_const['T']
     CB = d_constants['CB']  # 4pi*ksi*r0^2*Mo^2/(27*nu*R0)
 
-    """calculate integral of gradient^2 by volume of vesicle"""
+    """
+    calculate integral of gradient^2 by volume of vesicle
+    """
     gradHX, gradHY, gradHZ = tpl_integral(X, Y, Z)
 
     """calculete speed for x y z directions"""
@@ -174,8 +177,9 @@ def mover(X, Y, Z):
     Y += VY * DT
     Z += VZ * DT
 
-    if d_working_const['showDetails']: 
-        print(math.sqrt(X ** 2 + Y ** 2), Z)  # current info of vesicule movement
+    if d_working_const['showDetails']:
+        # current info of vesicule movement
+        print(math.sqrt(X ** 2 + Y ** 2), Z)
     return X, Y, Z
 
 
@@ -245,7 +249,7 @@ def roy(alpha, Z0, ry=0, rn=0):
         X = R0 * cos_a
         Y = R0 * sin_a
         Z = Z0
-        
+
         while stopper(X, Y, Z) and Z < N * delta * 1.2:
             X, Y, Z = mover(X, Y, Z)
 
@@ -278,29 +282,35 @@ def get_capture_area(Zi, A_RANGE):
     return x, y, z, r
 
 
-def new_capar(Xi, Yi, Zi, n):
-    x = []
-    y = []
-    z = []
-    xy = []
-    X = Xi
-    Y = Yi
-    Z = Zi
+def get_traectory(options):
+    Zlim = d_working_const['Zlim']
+    DeltaR = d_working_const['DeltaR']
+    D = d_constants['D']
+    N = d_constants['N']
+    delta = d_constants['delta']
 
-    for i in range(n):
-        X, Y, Z = mover(X, Y, Z)
+    points = []
+    X, Y, Z = options['coors'];
 
-        xy = xy + [math.sqrt(X ** 2 + Y ** 2)]
-        x = x + [X]
-        y = y + [Y]
-        z = z + [Z]
+    while stopper(X, Y, Z) and Z < N * delta * 1.2:
+        point = {};
+        point['COORS'] = mover(X, Y, Z)
+        X, Y, Z = point['COORS'];
+        point['DISTANCE_TO_ZO_AXE'] = math.sqrt(X ** 2 + Y**2)
+        points.append(point)
+    #     print(point)
+    # print(points)
+    return points
 
-    return x, y, z, xy
+def prepare_traectory_data(points):
+    y = list(map(lambda p: float(p['COORS'][2]), points)) # Z
+    x = list(map(lambda p: float(p['DISTANCE_TO_ZO_AXE']), points)) # R 
+    return {'x': x, 'y': y}  
 
 
-def run(params):
-    A = params['A_RANGE']
-    Z = params['Z0']
+def set_params(params):
+    globals()['A'] = params['A_RANGE']
+    globals()['Z'] = params['Z0']
     global d_working_const
     d_working_const = {
         'DeltaR': params['DeltaR'],
@@ -324,15 +334,13 @@ def run(params):
         V0=params['V0']
     )
 
+def run(params):
     x = []
     y = []
     z = []
     r = []
-    
+
     x, y, z, r = get_capture_area(Z, A)
     catchR = sum(r) / len(r)
     toV = round(float(catchR) - params['R0'] / params['r0'], 2) * params['r0']
     return toV
-
-
-
