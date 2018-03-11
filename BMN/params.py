@@ -53,10 +53,42 @@ DEFAULT_PARAMS = {
     'R0': 200,
     'ksi': 2,
     'Nu': 1.01 * 10 ** -2,
-    'N': 20,
+    'N': 5,
     'Mo': 477,
     'V0': 2 * 10 ** -4,
     'Z0': -20,
     'step': 1,
     'showDetails': False
     }
+
+PARAMS_META_DATA = {
+    'Hox': {
+        'desctiption': lambda v: r'OX part of external magnetic field,{}$ Gs$'.format(v)
+    },
+    'Hoz': {
+        'desctiption': lambda v: r'OZ part of external magnetic field,{}$ Gs$'.format(v)
+    },
+    'r0': {
+         'desctiption': lambda v: r'bmn particles radius,{}$ nm$'.format(v)
+    },
+    'R0': {
+         'desctiption': lambda v: r'vesicule radius,{}$ nm$'.format(v)
+    },
+    'ksi': {
+         'desctiption': lambda v: r'magnetic sensitiveness of vesicule, {}$ -\log(\chi)$'.format(v)
+    },
+    'Nu':{
+         'desctiption': lambda v: r'dynamic viscosity of medium, {}$ Gs$'.format(v)
+    },
+    'N': {
+         'desctiption': lambda v: r'OX part of external magnetic field, {}$ Gs$'.format(v)
+    },
+    'Mo': {
+         'desctiption': lambda v: r'OX part of external magnetic field, {}$ Gs$'.format(v)
+    },
+    'V0': {
+         'desctiption': lambda v: r'OX part of external magnetic field, {}$ Gs$'.format(v)
+    },
+}    
+
+print(PARAMS_META_DATA['Hox']['desctiption'](5))
