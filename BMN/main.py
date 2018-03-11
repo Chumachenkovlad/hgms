@@ -37,26 +37,33 @@ def start():
 
 def plots_data():
     primary_params = {
-        'R0': [50, 100, 200, 300, 500, 750]
+        'key': 'R0',
+        'values': [50] #, 100, 200, 300, 500, 750]
     }
     secondary_params = {
-        'ksi': [2,3,4,5,6,7]
+        'key': 'ksi',
+        'values': [2] # ,3,4,5,6,7]
     }
-    plots = {}
-    for secondary_value in secondary_params['ksi']:
-        plots[secondary_value] = {
+    plots = []
+    for secondary_value in secondary_params['values']:
+        plot = {
+            'secondaryParamValue': secondary_value,
+            'secondaryParamKey': secondary_params['key'],
+            'primaryParamKey': primary_params['key'],
             'x': [],
             'y': []
         }
-        for primary_value in primary_params['R0']:
+        for primary_value in primary_params['values']:
+            # extend default params by chosen
             params = {**DEFAULT_PARAMS, **{
                 'R0': primary_value,
                 'ksi': secondary_value
             }}
             chain.set_params(params)
             distance = chain.get_catching_distance_to_vesicule(params)
-            plots[secondary_value]['y'].append(distance)
-            plots[secondary_value]['x'].append(primary_value)
+            plot['y'].append(distance)
+            plot['x'].append(primary_value)
+        plots.append(plot)    
     print(plots)
     drawer.drawPlots(plots)
     
