@@ -35,15 +35,7 @@ def start():
         # resultString += '{}  '.format(chain.run(params))
         # print(resultString)
 
-def plots_data():
-    primary_params = {
-        'key': 'R0',
-        'values': [50] #, 100, 200, 300, 500, 750]
-    }
-    secondary_params = {
-        'key': 'ksi',
-        'values': [2] # ,3,4,5,6,7]
-    }
+def plots_data(primary_params, secondary_params):
     plots = []
     for secondary_value in secondary_params['values']:
         plot = {
@@ -64,9 +56,15 @@ def plots_data():
             plot['y'].append(distance)
             plot['x'].append(primary_value)
         plots.append(plot)    
-    print(plots)
     drawer.drawPlots(plots)
     
 if __name__ == "__main__":
-    # start()
-    plots_data()
+    primary_params = {
+        'key': 'R0',
+        'values': [20] #, 50, 75, 100, 150, 200, 300, 500, 750]
+    }
+    secondary_params = {
+        'key': 'ksi',
+        'values': [2] #,3,4,5,6,7]
+    }
+    plots_data(primary_params, secondary_params)

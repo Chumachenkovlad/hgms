@@ -49,7 +49,7 @@ DEFAULT_PARAMS = {
     'A_RANGE': [60],
     'Hox': 0,
     'Hoz': 0,
-    'r0': 50,
+    'r0': 100,
     'R0': 200,
     'ksi': 2,
     'Nu': 1.01 * 10 ** -2,
@@ -63,32 +63,57 @@ DEFAULT_PARAMS = {
 
 PARAMS_META_DATA = {
     'Hox': {
-        'desctiption': lambda v: r'OX part of external magnetic field,{}$ Gs$'.format(v)
+        'description': 'OX part of external \n magnetic field',
+        'units': r'$ Gs$'
     },
     'Hoz': {
-        'desctiption': lambda v: r'OZ part of external magnetic field,{}$ Gs$'.format(v)
+        'description': 'OZ part of external \n magnetic field',
+        'units': r'$ Gs$'
     },
     'r0': {
-         'desctiption': lambda v: r'bmn particles radius,{}$ nm$'.format(v)
+         'description': 'bmn particles radius',
+         'units': r'$ nm$'
     },
     'R0': {
-         'desctiption': lambda v: r'vesicule radius,{}$ nm$'.format(v)
+         'description': 'vesicule radius',
+         'units': r'$ nm$'
     },
     'ksi': {
-         'desctiption': lambda v: r'magnetic sensitiveness of vesicule, {}$ -\log(\chi)$'.format(v)
+         'description': 'magnetic sensitiveness \n of vesicule',
+         'units': r'$ -\log(\chi)$'
     },
     'Nu':{
-         'desctiption': lambda v: r'dynamic viscosity of medium, {}$ Gs$'.format(v)
+         'description': 'dynamic viscosity \n of medium',
+         'units': r'$ \frac{g}{cm s}$'
     },
     'N': {
-         'desctiption': lambda v: r'OX part of external magnetic field, {}$ Gs$'.format(v)
+         'description': 'count of bmn particles',
+         'units': r' pcs'
     },
     'Mo': {
-         'desctiption': lambda v: r'OX part of external magnetic field, {}$ Gs$'.format(v)
+         'description': 'Bmn particles magnetisation',
+         'units': r''
     },
     'V0': {
-         'desctiption': lambda v: r'OX part of external magnetic field, {}$ Gs$'.format(v)
+         'description': r'vesicule speed',
+         'units': r'$ \frac{cm}{s}$'
     },
-}    
+    'DISTANCE': {
+        'description': r'capturing distance',
+        'units': r'$ nm$'
+    }
+} 
 
-print(PARAMS_META_DATA['Hox']['desctiption'](5))
+def staticParamsDescription(exeptKeys):
+    paramsKeys = list(PARAMS_META_DATA.keys())
+    paramsKeys = [key for key in paramsKeys if key not in exeptKeys]
+    description = ""
+    for key in paramsKeys:
+        keyDescription = getDescription(key, DEFAULT_PARAMS[key])
+        description = description + keyDescription+ '\n'
+    return description    
+        
+
+
+def getDescription(key, value=''):
+    return PARAMS_META_DATA[key]['description']+', {}'.format(value)+PARAMS_META_DATA[key]['units']
