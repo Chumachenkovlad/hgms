@@ -4,6 +4,7 @@ import chain_model as chain
 import listManager as lm
 import drawer as drawer
 from params import *
+from input_data import *
 
 
 
@@ -59,12 +60,12 @@ def plots_data(primary_params, secondary_params):
     drawer.drawPlots(plots)
     
 if __name__ == "__main__":
-    primary_params = {
-        'key': 'R0',
-        'values': [20] #, 50, 75, 100, 150, 200, 300, 500, 750]
-    }
-    secondary_params = {
-        'key': 'ksi',
-        'values': [2] #,3,4,5,6,7]
-    }
-    plots_data(primary_params, secondary_params)
+    distanceExperimentData = getCapturingDistanceExperimentData()
+    for pair in distanceExperimentData:
+        primary_params, secondary_params = pair
+        try:
+            plots_data(primary_params, secondary_params)
+        except Exception:
+            print(primary_params, secondary_params, 'dont work')
+            pass
+

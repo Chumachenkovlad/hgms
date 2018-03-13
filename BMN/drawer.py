@@ -44,12 +44,19 @@ def drawPlots(plots):
 
   plt.xlabel(getDescription(primaryKey))
   plt.ylabel(getDescription('DISTANCE'))
-  plt.legend( fontsize=12, loc="upper left", ncol=2 ,title=getDescription(secondaryKey), bbox_to_anchor=(1.05, 1))
+  plt.text(0.7, 0.08, staticParamsDescription(['DISTANCE', primaryKey, secondaryKey]), ha='left', fontsize=8, transform=plt.gcf().transFigure)
+  plt.legend(
+    fontsize=10, 
+    loc="upper left", 
+    ncol=2 ,
+    title=getDescription(secondaryKey), 
+    bbox_to_anchor=(1.05, 1)
+    )
   plt.subplots_adjust(right=0.65)
   version = int(datetime.datetime.now().strftime('%s'))
-  print(staticParamsDescription(['DISTANCE', primaryKey, secondaryKey]))
-  filename = 'Y_{}_prymary_{}_secondary_{}_V_{}.svg'.format('DISTANCE', primaryKey, secondaryKey, version)
-  fig.savefig(filename, dpi=fig.dpi) 
-  plt.show() 
+  filename = 'results/plots/Y_{}_prymary_{}_secondary_{}_V_{}'.format('DISTANCE', primaryKey, secondaryKey, version)
+  fig.savefig(filename+".svg", dpi=fig.dpi) 
+  fig.savefig(filename+".png", dpi=fig.dpi) 
+  print(filename, ' saved')
     
   
