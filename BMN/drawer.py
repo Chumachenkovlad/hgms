@@ -4,19 +4,17 @@ from params import *
 import datetime
 
 colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-markers = []
+markers = ["o", "<", "*", "D", "P","X", "^"]
 plotStyles = []
-for m in Line2D.markers:
-    try:
-        if len(m) == 1 and m != ' ':
-            markers.append(m)
-    except TypeError:
-        pass
 
-for marker, color in zip(colors, markers):
-  plotStyles.append('{}{}-'.format(marker, color))  
-for marker, color in zip(colors[::-1], markers):
-  plotStyles.append('{}{}-'.format(marker, color))      
+
+def setPlotStyles():
+  globals()['plotStyles'] = []
+  for marker, color in zip(colors, markers):
+    globals()['plotStyles'].append('{}{}-'.format(marker, color))  
+  for marker, color in zip(colors[::-1], markers):
+    globals()['plotStyles'].append('{}{}-'.format(marker, color)) 
+     
 
 def drawPlot(x, y):
   plt.plot(x, y, 'ro')
@@ -30,10 +28,12 @@ def drawTraectories(traectories):
   fig.savefig('tra.svg', dpi=fig.dpi)
 
 def drawPlots(plots):
+  setPlotStyles()
   fig = plt.figure()
   plt.subplot(111)
   for plot in plots:
-    plotStyle = plotStyles.pop()
+    # print(globals()['plotStyles'])
+    plotStyle = globals()['plotStyles'].pop()
     plotLabel = '{}'.format( plot['secondaryParamValue'])
     x = plot['x'] # list of ordinates
     y = plot['y'] # list of abscises

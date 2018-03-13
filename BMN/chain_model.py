@@ -123,18 +123,20 @@ def tpl_integral(X, Y, Z):
     i_gradHY = 0
     i_gradHZ = 0
     mR = d_constants['mR']  # (R0/r0)^2
-    limX1 = math.sqrt(mR) * 0.99
+    limX1 = math.sqrt(mR)
     step = limX1 * 2 / 15  # d_working_const['step']  # math.sqrt(mR)/10
     step_volume = step ** 3
-
     """set a variation of X1,Y1,Z1 coors into vesicle"""
     for X1 in list(frange(-limX1, limX1, step)):
-        limY1 = math.sqrt(mR - X1 ** 2) * 0.99
+        limY1Y1 = mR - X1 ** 2
+        if (limY1Y1 <= 0): continue
+        limY1 = math.sqrt(limY1Y1)
         # step = 2 * limY1 / 10
 
         for Y1 in list(frange(-limY1, limY1, step)):
-
-            limZ1 = math.sqrt(mR - X1 ** 2 - Y1 ** 2) * 0.99
+            limZ1Z1 = mR - X1 ** 2 - Y1 ** 2
+            if (limZ1Z1 <= 0): continue
+            limZ1 = math.sqrt(limZ1Z1)
             # step = 2 * limZ1 / 10
             for Z1 in list(frange(-limZ1, limZ1, step)):
                 # print (X1,Y1, Z1)
@@ -244,21 +246,25 @@ def roy(alpha, Z0, ry=0, rn=0):
     sin_a = math.sin(math.pi * alpha / 180)
 
     while True:
-
         R0 = R_Yes + (R_No - R_Yes) / 2.0
+        # print(R0,R_No, R_Yes )
         X = R0 * cos_a
         Y = R0 * sin_a
         Z = Z0
 
         while stopper(X, Y, Z) and Z < N * delta * 1.2:
+            # print(stopper(X, Y, Z), Z < N * delta * 1.2, X, Y, Z)
             X, Y, Z = mover(X, Y, Z)
 
         if Z > N * delta * 1.2:
+            # print('R_No = R0')
             R_No = R0
         else:
-            R_Yes = R0
+            # print('R_Yes = R0')
+            R_Yes = R0  
 
         if R_No - R_Yes < DeltaR:
+            # print('X, Y, Z, R0')
             R0 = (R_No + R_Yes) / 2.0
             X = R0 * cos_a
             Y = R0 * sin_a
@@ -347,4 +353,5 @@ def get_catching_distance_to_vesicule(params):
     R0, r0 = params['R0'], params['r0']
     catchR = sum(r) / len(r) - R0 / r0
     distanceToVesicule = round(catchR, 2) * r0
+    print(distanceToVesicule)
     return distanceToVesicule
