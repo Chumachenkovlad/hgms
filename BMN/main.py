@@ -20,14 +20,43 @@ def runTraectoryExperiment():
     paramsLists = lm.manageLists(PARAMS_FOR_TRAEKTORY)
     # print('r0(nm)   R0(nm)  ksi(10^-)   N(pcls num) CatchingRadius(nm)')
     traectories = []
-    for R in chain.frange(0,20,0.2):
+    for R in [0]: #chain.frange(0,20,4):
         # resultString = getParamsString(params)
         chain.set_params(DEFAULT_PARAMS)
         options = {
-            'coors': (R, R, -20)
+            'coors': (R, R, -10),
+            'limit': True
         }
         points = chain.get_traectory(options)
-        traectories.append(chain.prepare_traectory_data(points))
+        traectories.append({**chain.prepare_traectory_data(points), **{'R': R}})
+    drawer.drawTraectories(traectories)
+        # chain.run(params)
+        # resultString += '{}  '.format(chain.run(params))
+        # print(resultString)
+
+def runWalkingToChainExperiment():
+    paramsLists = lm.manageLists(PARAMS_FOR_TRAEKTORY)
+    # print('r0(nm)   R0(nm)  ksi(10^-)   N(pcls num) CatchingRadius(nm)')
+    traectories = []
+    dt = DEFAULT_PARAMS['dt']
+    for N in [0,1, 3, 7, 25]:
+        chain.set_params({**DEFAULT_PARAMS, **{
+                    'N': N
+                }})
+        options = {
+            'coors': (0, 0, -(DEFAULT_PARAMS['cell_R'] / DEFAULT_PARAMS['r0'])),
+            'limit': True
+        }
+        points = chain.get_traectory(options)
+        t = {
+            'x': [i*dt for i in range(len(points))],
+            'y': [points[i]['COORS'][2] for i in range(len(points))],
+            **{'R': N}
+        }
+        traectories.append(t)
+        # print(t)
+        print(points.__len__() * dt, sep="\t")
+
     drawer.drawTraectories(traectories)
         # chain.run(params)
         # resultString += '{}  '.format(chain.run(params))
@@ -63,6 +92,7 @@ def runDistanceExperiment():
         plots_data(primary_params, secondary_params) 
     
 if __name__ == "__main__":
-    runDistanceExperiment()
+    # runDistanceExperiment()
     # runTraectoryExperiment()
+    runWalkingToChainExperiment()
 

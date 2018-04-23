@@ -22,10 +22,41 @@ def drawPlot(x, y):
 
 def drawTraectories(traectories):
   fig = plt.figure()
+  plt.subplot(111)
+  setPlotStyles()
   for t in traectories:
-    plt.plot(t['x'], t['y'], 'ro', markersize=3)
-  plt.show() 
-  fig.savefig('tra.svg', dpi=fig.dpi)
+    plotStyle = globals()['plotStyles'].pop()
+    plt.plot(t['x'], t['y'], plotStyle, markersize=2, label=t['R'])
+  plt.legend(
+    fontsize=10, 
+    loc="upper left", 
+    ncol=2 , 
+    bbox_to_anchor=(1.05, 1)
+    )
+  plt.subplots_adjust(right=0.65)  
+  version = int(datetime.datetime.now().strftime('%s'))
+  fig.savefig('results/tra/tra-{}.svg'.format(version), dpi=fig.dpi)
+  fig.savefig('results/tra/tra-{}.png'.format(version), dpi=fig.dpi)
+  print('saved')
+
+def drawWalkingToChain(traectories):
+  fig = plt.figure()
+  plt.subplot(111)
+  setPlotStyles()
+  for t in traectories:
+    plotStyle = globals()['plotStyles'].pop()
+    plt.plot(t['x'], t['y'], plotStyle, markersize=2, label=t['R'])
+  plt.legend(
+    fontsize=10, 
+    loc="upper left", 
+    ncol=2 , 
+    bbox_to_anchor=(1.05, 1)
+    )
+  plt.subplots_adjust(right=0.65)  
+  version = int(datetime.datetime.now().strftime('%s'))
+  fig.savefig('results/tra/WalkingToChain-{}.svg'.format(version), dpi=fig.dpi)
+  fig.savefig('results/tra/WalkingToChain-{}.png'.format(version), dpi=fig.dpi)
+  print('saved')
 
 def drawPlots(plots):
   setPlotStyles()

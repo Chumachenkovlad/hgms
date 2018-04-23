@@ -9,7 +9,7 @@ PARAMS = [
     {'Hoz': [50]},
     {'r0': [20]},
     {'R0': [i * 20 for i in range(1, 20)]},
-    {'ksi': [4]},
+    {'ksi': [2]},
     {'Nu': [1.01 * 10 ** -2]},
     {'N': [20]},
     {'Mo': [477]},
@@ -41,24 +41,29 @@ PARAMS_FOR_TRAEKTORY = [
 ]
 
 DEFAULT_PARAMS = {
+    'dimentions_count': 1,
+    'dt': 0.1,
+    'cell_R': 10000,
+    'diffusion_exp': 1,
     'DeltaR': 0.2,
     'ZT': 0.1,
     'Zlim': 20,
     'Spow': 0.5,
-    'T': 0.3,
+    'T': 0.1,
     'A_RANGE': [60],
     'Hox': -50,
     'Hoz': -50,
     'r0': 50,
-    'R0': 250,
-    'ksi': 4,
+    'R0': 100,
+    'ksi': 1,
     'Nu': 1.01 * 10 ** -2,
-    'N': 10,
+    'N': 0,
     'Mo': 477,
     'V0': 2 * 10 ** -4,
     'Z0': -20,
     'step': 1,
-    'showDetails': False
+    'showDetails': False,
+    'chain': True
     }
 
 PARAMS_META_DATA = {

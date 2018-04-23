@@ -1,10 +1,15 @@
 from numba import jit
 import math
+import random
+from random import randrange
+import numpy
 pi = math.pi
 pi2 = math.pi ** 2
 
 d_constants = dict()  # working constants
 d_physical_const = dict()  # dict for physical parameters
+
+
 
 
 @jit
@@ -47,6 +52,17 @@ def set_constants(**kw):
     Rm = (R0 / r0) ** 2
     delta = trueDelta / r0 + 2
 
+
+    dt = d_working_const['dt']
+    diffusion_exp = d_working_const['diffusion_exp']
+    dimentions_count = d_working_const['dimentions_count']
+
+    # deffusion data
+    R_BOLTSMANA = 1.3806488 * 10 ** -16
+    TEMP = 273 + 37
+    DEFFUSION_CONST = R_BOLTSMANA * TEMP / (3 * pi * Nu * R0)
+    MSD_NORMAL_DISTRIBUTION_LIST = numpy.random.normal(0, 2 * dimentions_count * DEFFUSION_CONST * dt ** diffusion_exp, 1000)
+
     d_constants['N'] = N
     d_constants['CB'] = CB
     d_constants['Ex'] = Ex
@@ -54,6 +70,8 @@ def set_constants(**kw):
     d_constants['mR'] = Rm
     d_constants['delta'] = delta
     d_constants['D'] = R0 / r0
+    d_constants['DEFFUSION_CONST'] = DEFFUSION_CONST
+    d_constants['MSD_NORMAL_DISTRIBUTION_LIST'] = MSD_NORMAL_DISTRIBUTION_LIST
 
 
 @jit
@@ -160,6 +178,11 @@ def mover(X, Y, Z):
     Spow = d_working_const['Spow']
     T = d_working_const['T']
     CB = d_constants['CB']  # 4pi*ksi*r0^2*Mo^2/(27*nu*R0)
+    DEFFUSION_CONST = d_constants['DEFFUSION_CONST']
+    MSD_NORMAL_DISTRIBUTION_LIST = d_constants['MSD_NORMAL_DISTRIBUTION_LIST']
+    r0 = d_physical_const['r0']
+    V0 = d_working_const['V0']
+    dt = d_working_const['dt']
 
     """
     calculate integral of gradient^2 by volume of vesicle
@@ -167,18 +190,28 @@ def mover(X, Y, Z):
     gradHX, gradHY, gradHZ = tpl_integral(X, Y, Z)
 
     """calculete speed for x y z directions"""
-    VX = gradHX * CB  # We can add 1 with + or -
-    VY = gradHY * CB  # to each  VX,VY,VZ
-    VZ = gradHZ * CB + 1  # to chenge direction of movement of vesicule
-
+    # VX = gradHX * CB  # We can add 1 with + or -
+    # VY = gradHY * CB  # to each  VX,VY,VZ
+    VZ = gradHZ * CB + 1 # to chenge direction of movement of vesicule
     """calculete elementary time size"""
-    DT = T / (ZT * (1 + (VX * VX + VY * VY + VZ * VZ) ** Spow))
+    # DT = T / (ZT * (1 + (VX * VX + VY * VY + VZ * VZ) ** Spow))
 
+    deffusion_shift = random.choice(MSD_NORMAL_DISTRIBUTION_LIST)
+    # x_random = randrange(-990,990)/1000 # (from -1 to 1)
+    # deffusion_shift_x = math.sqrt(deffusion_shift) * x_random
+    # yran = int(math.sqrt(math.fabs(1-x_random**2)) * 1000)
+
+    # y_random = randrange(-yran, yran)/1000
+    # deffusion_shift_y = math.sqrt(deffusion_shift) * y_random
+
+    # deffusion_shift_z = math.sqrt(deffusion_shift - deffusion_shift_y ** 2 - deffusion_shift_x ** 2) * randrange(-1, 1)
     """calculate new coordinates of vesicle after moving DT time interval"""
-    X += VX * DT
-    Y += VY * DT
-    Z += VZ * DT
-
+    # X += VX * DT + deffusion_shift_x /r0
+    # Y += VY * DT + deffusion_shift_y /r0
+    Z += VZ * dt + deffusion_shift / r0
+    # print(VX * DT, deffusion_shift_x)
+    # print(VY * DT, deffusion_shift_y)
+    # print(VZ * DT, deffusion_shift_z)
     if d_working_const['showDetails']:
         # current info of vesicule movement
         print(math.sqrt(X ** 2 + Y ** 2), Z)
@@ -294,16 +327,29 @@ def get_traectory(options):
     D = d_constants['D']
     N = d_constants['N']
     delta = d_constants['delta']
+    cell_R = d_working_const['cell_R']
 
     points = []
     X, Y, Z = options['coors'];
-
-    while stopper(X, Y, Z) and Z < N * delta * 1.2:
-        point = {};
-        point['COORS'] = mover(X, Y, Z)
-        X, Y, Z = point['COORS'];
-        point['DISTANCE_TO_ZO_AXE'] = math.sqrt(X ** 2 + Y**2)
-        points.append(point)
+    if (options['limit']):
+        while True:
+            point = {};
+            point['COORS'] = mover(X, Y, Z)
+            X, Y, Z = point['COORS']
+            # print(Z)
+            if Z < 0:
+                point['DISTANCE_TO_ZO_AXE'] = Z
+                points.append(point)
+            if Z > -1:
+                break
+    else:            
+        for i in range(50):
+        # while stopper(X, Y, Z) and Z < N * delta * 1.2:
+            point = {};
+            point['COORS'] = mover(X, Y, Z)
+            X, Y, Z = point['COORS'];
+            point['DISTANCE_TO_ZO_AXE'] = X # math.sqrt(X ** 2 + Y**2)
+            points.append(point)
     #     print(point)
     # print(points)
     return points
@@ -311,22 +357,29 @@ def get_traectory(options):
 def prepare_traectory_data(points):
     y = list(map(lambda p: float(p['COORS'][2]), points)) # Z
     x = list(map(lambda p: float(p['DISTANCE_TO_ZO_AXE']), points)) # R 
-    return {'x': x, 'y': y}  
-
+    return {'x': x, 'y': y}      
 
 def set_params(params):
     globals()['A'] = params['A_RANGE']
-    globals()['Z'] = params['Z0']
+    # globals()['Z'] = #params['Z0']
     global d_working_const
     d_working_const = {
+        'chain': params['chain'],
+        'dimentions_count': params['dimentions_count'],
+        'dt': params['dt'],
+        'cell_R': (params['cell_R'] / params['r0']) ,
+        'diffusion_exp': params['diffusion_exp'],
         'DeltaR': params['DeltaR'],
         'ZT':     params['ZT'],
         'Zlim':   params['Zlim'],
         'Spow':   params['Spow'],
         'T':      params['T'],
+        'V0': params['V0'],
         'step':   params['step'],
-        'showDetails': params['showDetails']
+        'showDetails': params['showDetails'],
+        'normalDistribution': numpy.random.normal(0, 1)
     }
+    globals()['Z'] = -d_working_const['cell_R']#params['Z0']
 
     set_constants(
         Hox=params['Hox'],
