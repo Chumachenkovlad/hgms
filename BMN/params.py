@@ -41,10 +41,10 @@ PARAMS_FOR_TRAEKTORY = [
 ]
 
 DEFAULT_PARAMS = {
-    'dimentions_count': 1,
+    'dimentions_count': 3,
     'dt': 0.1,
     'cell_R': 10000,
-    'diffusion_exp': 1,
+    'diffusion_exp': 0.8,
     'DeltaR': 0.2,
     'ZT': 0.1,
     'Zlim': 20,
@@ -54,17 +54,28 @@ DEFAULT_PARAMS = {
     'Hox': -50,
     'Hoz': -50,
     'r0': 50,
-    'R0': 100,
-    'ksi': 1,
+    'R0': 250,
+    'ksi': 2,
     'Nu': 1.01 * 10 ** -2,
     'N': 0,
     'Mo': 477,
-    'V0': 2 * 10 ** -4,
+    'V0': 500 * 10 ** -4,
     'Z0': -20,
     'step': 1,
     'showDetails': False,
     'chain': True
     }
+
+SERIES = [
+    # Magnetic field - HIGH, vesicle sensitive - HIGH
+    {**DEFAULT_PARAMS,**{'Hox': -7000, 'Hoz': -7000, 'ksi': 2}},
+    # Magnetic field - HIGH, vesicle sensitive - LOW
+    {**DEFAULT_PARAMS,**{'Hox': -7000, 'Hoz': -7000, 'ksi': 6}},
+    # Magnetic field - LOW, vesicle sensitive - HIGH
+    {**DEFAULT_PARAMS,**{'Hox': -50, 'Hoz': -50, 'ksi': 2}},
+    # Magnetic field - LOW, vesicle sensitive - LOW
+    {**DEFAULT_PARAMS,**{'Hox': -50, 'Hoz': -50, 'ksi': 6}},
+]    
 
 PARAMS_META_DATA = {
     'Hox': {

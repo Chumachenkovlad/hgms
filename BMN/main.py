@@ -5,6 +5,7 @@ import listManager as lm
 import drawer as drawer
 from params import *
 from input_data import *
+import math
 
 
 def getParamsString(params):
@@ -20,47 +21,53 @@ def runTraectoryExperiment():
     paramsLists = lm.manageLists(PARAMS_FOR_TRAEKTORY)
     # print('r0(nm)   R0(nm)  ksi(10^-)   N(pcls num) CatchingRadius(nm)')
     traectories = []
-    for R in [0]: #chain.frange(0,20,4):
+    for R in [0, 3, 5, 7, 10, 15]:
         # resultString = getParamsString(params)
         chain.set_params(DEFAULT_PARAMS)
         options = {
-            'coors': (R, R, -10),
-            'limit': True
+            'coors': (R, R, -40),
+            'limit': False
         }
+        dt = DEFAULT_PARAMS['dt']
         points = chain.get_traectory(options)
-        traectories.append({**chain.prepare_traectory_data(points), **{'R': R}})
-    drawer.drawTraectories(traectories)
+        pointToR = lambda p: math.sqrt(sum(map(lambda coor: coor**2, p['COORS']))) 
+        valuesRange = list(map(pointToR, [points[i] for i in range(len(points))]))
+        timesRange = [i*dt for i in range(len(points))]
+
+        x = [points[i]['COORS'][0] for i in range(len(points))]
+        y = [points[i]['COORS'][1] for i in range(len(points))]
+        z = [points[i]['COORS'][2] for i in range(len(points))]
+
+        traectories.append({'x': x, 'y': y, 'z': z, 'R': R, 'DEFAULT_PARAMS': DEFAULT_PARAMS})
+    drawer.draw3DTraectory(traectories);    
+    # drawer.drawTraectories(traectories)
         # chain.run(params)
         # resultString += '{}  '.format(chain.run(params))
         # print(resultString)
 
-def runWalkingToChainExperiment():
-    paramsLists = lm.manageLists(PARAMS_FOR_TRAEKTORY)
-    # print('r0(nm)   R0(nm)  ksi(10^-)   N(pcls num) CatchingRadius(nm)')
+def runWalkingToChainExperiment(default_params):
     traectories = []
-    dt = DEFAULT_PARAMS['dt']
-    for N in [0,1, 3, 7, 25]:
-        chain.set_params({**DEFAULT_PARAMS, **{
+    dt = default_params['dt']
+    for N in [0, 1, 3, 7, 25]:
+        chain.set_params({**default_params, **{
                     'N': N
                 }})
         options = {
-            'coors': (0, 0, -(DEFAULT_PARAMS['cell_R'] / DEFAULT_PARAMS['r0'])),
+            'coors': (0, 0, -(default_params['cell_R'] / default_params['r0'])),
             'limit': True
         }
         points = chain.get_traectory(options)
+
         t = {
             'x': [i*dt for i in range(len(points))],
-            'y': [points[i]['COORS'][2] for i in range(len(points))],
+            'y': [default_params['cell_R']+points[i]['COORS'][2]*default_params['r0'] for i in range(len(points))],
             **{'R': N}
         }
         traectories.append(t)
-        # print(t)
+
         print(points.__len__() * dt, sep="\t")
 
-    drawer.drawTraectories(traectories)
-        # chain.run(params)
-        # resultString += '{}  '.format(chain.run(params))
-        # print(resultString)
+    drawer.drawWalkingToChain(traectories)
 
 def plots_data(primary_params, secondary_params):
     plots = []
@@ -92,7 +99,9 @@ def runDistanceExperiment():
         plots_data(primary_params, secondary_params) 
     
 if __name__ == "__main__":
-    # runDistanceExperiment()
+    runDistanceExperiment()
     # runTraectoryExperiment()
-    runWalkingToChainExperiment()
+    # for params in SERIES:
+        # runWalkingToChainExperiment(params)
+        
 

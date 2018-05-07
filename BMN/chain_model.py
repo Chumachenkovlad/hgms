@@ -10,7 +10,10 @@ d_constants = dict()  # working constants
 d_physical_const = dict()  # dict for physical parameters
 
 
-
+def getRandomVector():
+    v = [random.gauss(0, 1) for i in range(0, 3)]
+    inv_len = 1.0 / math.sqrt(sum(coord * coord for coord in v))
+    return [coord * inv_len for coord in v]
 
 @jit
 def frange(start, stop, step=1.0):
@@ -72,7 +75,6 @@ def set_constants(**kw):
     d_constants['D'] = R0 / r0
     d_constants['DEFFUSION_CONST'] = DEFFUSION_CONST
     d_constants['MSD_NORMAL_DISTRIBUTION_LIST'] = MSD_NORMAL_DISTRIBUTION_LIST
-
 
 @jit
 def f(X1, Y1, Z1, X, Y, Z):
@@ -168,7 +170,7 @@ def tpl_integral(X, Y, Z):
     return i_gradHX, i_gradHY, i_gradHZ
 
 
-@jit
+
 def mover(X, Y, Z):
     """
     this function get old coordinates of center of vesicule
@@ -190,28 +192,24 @@ def mover(X, Y, Z):
     gradHX, gradHY, gradHZ = tpl_integral(X, Y, Z)
 
     """calculete speed for x y z directions"""
-    # VX = gradHX * CB  # We can add 1 with + or -
-    # VY = gradHY * CB  # to each  VX,VY,VZ
+    VX = gradHX * CB  # We can add 1 with + or -
+    VY = gradHY * CB  # to each  VX,VY,VZ
     VZ = gradHZ * CB + 1 # to chenge direction of movement of vesicule
     """calculete elementary time size"""
     # DT = T / (ZT * (1 + (VX * VX + VY * VY + VZ * VZ) ** Spow))
 
     deffusion_shift = random.choice(MSD_NORMAL_DISTRIBUTION_LIST)
-    # x_random = randrange(-990,990)/1000 # (from -1 to 1)
-    # deffusion_shift_x = math.sqrt(deffusion_shift) * x_random
-    # yran = int(math.sqrt(math.fabs(1-x_random**2)) * 1000)
+    x_shift, y_shift, z_shift = [deffusion_shift * part / r0 for part in getRandomVector()]#]
 
-    # y_random = randrange(-yran, yran)/1000
-    # deffusion_shift_y = math.sqrt(deffusion_shift) * y_random
-
-    # deffusion_shift_z = math.sqrt(deffusion_shift - deffusion_shift_y ** 2 - deffusion_shift_x ** 2) * randrange(-1, 1)
     """calculate new coordinates of vesicle after moving DT time interval"""
-    # X += VX * DT + deffusion_shift_x /r0
-    # Y += VY * DT + deffusion_shift_y /r0
-    Z += VZ * dt + deffusion_shift / r0
-    # print(VX * DT, deffusion_shift_x)
-    # print(VY * DT, deffusion_shift_y)
-    # print(VZ * DT, deffusion_shift_z)
+
+    X += VX * dt + x_shift
+    Y += VY * dt + y_shift
+    Z += VZ * dt + z_shift
+    # print(VX * dt, x_shift)
+    # print(VY * dt, y_shift)
+    # print(VZ * dt, z_shift)
+    # print((X,Y,Z), (VX * dt, VY * dt, VZ * dt), (x_shift, y_shift, z_shift))
     if d_working_const['showDetails']:
         # current info of vesicule movement
         print(math.sqrt(X ** 2 + Y ** 2), Z)
@@ -328,7 +326,7 @@ def get_traectory(options):
     N = d_constants['N']
     delta = d_constants['delta']
     cell_R = d_working_const['cell_R']
-
+    over_step_count = 0
     points = []
     X, Y, Z = options['coors'];
     if (options['limit']):
@@ -343,15 +341,19 @@ def get_traectory(options):
             if Z > -1:
                 break
     else:            
-        for i in range(50):
+        for i in range(1000):
+            if over_step_count > 10 or Z > 5 * delta * 1.2:
+                break
         # while stopper(X, Y, Z) and Z < N * delta * 1.2:
             point = {};
             point['COORS'] = mover(X, Y, Z)
+            print(math.sqrt(  (point['COORS'][0] - X)**2 + (point['COORS'][1] - Y)**2 + (point['COORS'][2] - Z)**2   ))
+            if (math.sqrt(  (point['COORS'][0] - X)**2 + (point['COORS'][1] - Y)**2 + (point['COORS'][2] - Z)**2   )) > 5:
+                over_step_count+=1
+                continue
             X, Y, Z = point['COORS'];
             point['DISTANCE_TO_ZO_AXE'] = X # math.sqrt(X ** 2 + Y**2)
             points.append(point)
-    #     print(point)
-    # print(points)
     return points
 
 def prepare_traectory_data(points):
