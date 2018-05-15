@@ -6,8 +6,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from params import DEFAULT_PARAMS
 
-colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-markers = ["o", "<", "*", "D", "P","X", "^"]
+colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'b', 'g', 'r', 'c', 'm', 'y', 'k', 'b', 'g', 'r', 'c', 'm', 'y', 'k']
+markers = ["o", "<", "*", "D", "P","X", "^", "o", "<", "*", "D", "P","X", "^", "o", "<", "*", "D", "P","X", "^"]
 plotStyles = []
 
 
@@ -56,7 +56,7 @@ def drawWalkingToChain(traectories):
     title="Кількість частинок \nБМН у ланцюжку",
     bbox_to_anchor=(1.05, 1)
     )
-  plt.xlabel("Час подолання відстані, (ум.од.)")
+  plt.xlabel("Час подолання відстані, мкс")
   plt.ylabel('Пройдена везикулою відстань, нм')  
   plt.subplots_adjust(right=0.65)  
   version = int(datetime.datetime.now().strftime('%s'))
@@ -76,9 +76,9 @@ def draw3DTraectory(traectories):
   for n in range(N):
     ax.plot_surface(px, py, pz+(n+1.5*n), color='b')
 
-  ax.set_xlim(-2, 20)
-  ax.set_ylim(-2, 20)
-  ax.set_zlim(-40, 10)
+  ax.set_xlim(-2, int(t['x'][0]+5))
+  ax.set_ylim(-2, int(t['y'][0]+5))
+  ax.set_zlim(int(t['z'][0] - 5), 15)
 
   plt.show()
 
@@ -109,15 +109,15 @@ def drawPlots(plots):
 
   plt.xlabel(getDescription(primaryKey))
   plt.ylabel(getDescription('DISTANCE'))
-  plt.text(0.7, 0.08, staticParamsDescription(['DISTANCE', primaryKey, secondaryKey]), ha='left', fontsize=8, transform=plt.gcf().transFigure)
+  plt.text(0.63, 0.08, staticParamsDescription(['DISTANCE', primaryKey, secondaryKey]), ha='left', fontsize=8, transform=plt.gcf().transFigure)
   plt.legend(
     fontsize=10, 
     loc="upper left", 
     ncol=2 ,
     title=getDescription(secondaryKey), 
-    bbox_to_anchor=(1.05, 1)
+    bbox_to_anchor=(1.02, 1)
     )
-  plt.subplots_adjust(right=0.65)
+  plt.subplots_adjust(right=0.60)
   version = int(datetime.datetime.now().strftime('%s'))
   filename = 'results/plots/Y_{}_prymary_{}_secondary_{}_V_{}'.format('DISTANCE', primaryKey, secondaryKey, version)
   fig.savefig(filename+".svg", dpi=fig.dpi) 

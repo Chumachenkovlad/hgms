@@ -11,7 +11,7 @@ d_physical_const = dict()  # dict for physical parameters
 
 
 def getRandomVector():
-    v = [random.gauss(0, 1) for i in range(0, 3)]
+    v = [numpy.random.normal(0, 1) for i in range(0, 3)]
     inv_len = 1.0 / math.sqrt(sum(coord * coord for coord in v))
     return [coord * inv_len for coord in v]
 
@@ -35,8 +35,7 @@ def set_constants(**kw):
 
     pi = math.pi
     Mo = kw['Mo']
-    Hox = kw['Hox']
-    Hoz = kw['Hoz']
+    Ho = kw['Ho']
 
     r0 = kw['r0']
     R0 = kw['R0']
@@ -50,31 +49,43 @@ def set_constants(**kw):
 
     CB = 4 * pi * ksi * r0 ** 2 * Mo ** 2 / \
         (27 * Nu * R0 * V0)  # 4*pi*ksi*r0^2*Mo^2/(27*nu*R0)
-    Ex = 3 * pi * Hox / (2 * Mo)
-    Ez = 3 * pi * Hoz / (2 * Mo)
+    Ex = 3 * pi * Ho / (2 * Mo)
+    Ez = 3 * pi * Ho / (2 * Mo)
     Rm = (R0 / r0) ** 2
     delta = trueDelta / r0 + 2
 
 
     dt = d_working_const['dt']
     diffusion_exp = d_working_const['diffusion_exp']
-    dimentions_count = d_working_const['dimentions_count']
+    dimensions_count = d_working_const['dimensions_count']
 
     # deffusion data
     R_BOLTSMANA = 1.3806488 * 10 ** -16
     TEMP = 273 + 37
     DEFFUSION_CONST = R_BOLTSMANA * TEMP / (3 * pi * Nu * R0)
-    MSD_NORMAL_DISTRIBUTION_LIST = numpy.random.normal(0, 2 * dimentions_count * DEFFUSION_CONST * dt ** diffusion_exp, 1000)
+    MSD_NORMAL_DISTRIBUTION_LIST = list(map(math.fabs, numpy.random.normal(0, dimensions_count * DEFFUSION_CONST * (dt * r0/ V0) ** diffusion_exp, 1000)))
+    RANDOM_VECTORS = [getRandomVector() for i in range(1000)]
+    constants = {
+        'N': N,
+        'CB': CB,
+        'Ex': Ex,
+        'Ez': Ez,
+        'mR': Rm,
+        'delta': delta,
+        'D': R0 / r0,
+        'DEFFUSION_CONST': DEFFUSION_CONST,
+        'MSD_NORMAL_DISTRIBUTION_LIST': MSD_NORMAL_DISTRIBUTION_LIST,
+        'RANDOM_VECTORS': RANDOM_VECTORS
+    }
 
-    d_constants['N'] = N
-    d_constants['CB'] = CB
-    d_constants['Ex'] = Ex
-    d_constants['Ez'] = Ez
-    d_constants['mR'] = Rm
-    d_constants['delta'] = delta
-    d_constants['D'] = R0 / r0
-    d_constants['DEFFUSION_CONST'] = DEFFUSION_CONST
-    d_constants['MSD_NORMAL_DISTRIBUTION_LIST'] = MSD_NORMAL_DISTRIBUTION_LIST
+    d_constants = {**d_constants, **constants}
+
+def getPointMSD():
+    msd = random.choice(d_constants['MSD_NORMAL_DISTRIBUTION_LIST'])
+    vector = random.choice(d_constants['RANDOM_VECTORS'])
+    r0 = d_physical_const['r0']
+    x_shift, y_shift, z_shift = [msd * part / r0 for part in vector]
+    return x_shift, y_shift, z_shift
 
 @jit
 def f(X1, Y1, Z1, X, Y, Z):
@@ -84,10 +95,10 @@ def f(X1, Y1, Z1, X, Y, Z):
     2) coordinates of center of vesicule
     and return fx, fy, fz summs of forces of each bmn of chain
     """
-    Ex = d_constants['Ex']  # 3*pi*HoX/(2*Mo)
-    Ez = d_constants['Ez']  # 3*pi*HoZ/(2*Mo)
-    delta = d_constants['delta']  # delta0+2
-    N = d_constants['N']  # num of particles in chain
+    Ex = d_constants['Ex']
+    Ez = d_constants['Ez'] 
+    delta = d_constants['delta'] 
+    N = d_constants['N']
 
     """params independent from i(item of chein)"""
     X2plusY2 = (X + X1) ** 2 + (Y + Y1) ** 2
@@ -151,16 +162,14 @@ def tpl_integral(X, Y, Z):
         limY1Y1 = mR - X1 ** 2
         if (limY1Y1 <= 0): continue
         limY1 = math.sqrt(limY1Y1)
-        # step = 2 * limY1 / 10
 
         for Y1 in list(frange(-limY1, limY1, step)):
             limZ1Z1 = mR - X1 ** 2 - Y1 ** 2
             if (limZ1Z1 <= 0): continue
             limZ1 = math.sqrt(limZ1Z1)
-            # step = 2 * limZ1 / 10
+
             for Z1 in list(frange(-limZ1, limZ1, step)):
-                # print (X1,Y1, Z1)
-                """calculate fx,fz,fy for X1,Y1,Z1"""
+  
                 dfx, dfy, dfz = f(X1, Y1, Z1, X, Y, Z)
 
                 i_gradHX += dfx * step_volume
@@ -170,20 +179,16 @@ def tpl_integral(X, Y, Z):
     return i_gradHX, i_gradHY, i_gradHZ
 
 
-
+@jit
 def mover(X, Y, Z):
     """
     this function get old coordinates of center of vesicule
     return new coordinates
     """
-    ZT = d_working_const['ZT']
-    Spow = d_working_const['Spow']
-    T = d_working_const['T']
     CB = d_constants['CB']  # 4pi*ksi*r0^2*Mo^2/(27*nu*R0)
-    DEFFUSION_CONST = d_constants['DEFFUSION_CONST']
     MSD_NORMAL_DISTRIBUTION_LIST = d_constants['MSD_NORMAL_DISTRIBUTION_LIST']
+    RANDOM_VECTORS = d_constants['RANDOM_VECTORS']
     r0 = d_physical_const['r0']
-    V0 = d_working_const['V0']
     dt = d_working_const['dt']
 
     """
@@ -199,17 +204,18 @@ def mover(X, Y, Z):
     # DT = T / (ZT * (1 + (VX * VX + VY * VY + VZ * VZ) ** Spow))
 
     deffusion_shift = random.choice(MSD_NORMAL_DISTRIBUTION_LIST)
-    x_shift, y_shift, z_shift = [deffusion_shift * part / r0 for part in getRandomVector()]#]
+    x_shift, y_shift, z_shift = getPointMSD()
 
     """calculate new coordinates of vesicle after moving DT time interval"""
 
-    X += VX * dt + x_shift
-    Y += VY * dt + y_shift
+    #X += VX * dt #+ x_shift
+   # Y += VY * dt #+ y_shift
     Z += VZ * dt + z_shift
     # print(VX * dt, x_shift)
     # print(VY * dt, y_shift)
     # print(VZ * dt, z_shift)
     # print((X,Y,Z), (VX * dt, VY * dt, VZ * dt), (x_shift, y_shift, z_shift))
+    # print(math.sqrt(X ** 2 + Y ** 2), Z)
     if d_working_const['showDetails']:
         # current info of vesicule movement
         print(math.sqrt(X ** 2 + Y ** 2), Z)
@@ -221,7 +227,7 @@ def stopper(X, Y, Z):
        captured by chain of bmn
     """
     D = d_constants['D']
-    return math.sqrt(Y ** 2 + X ** 2) > 1 + D  # working only for movement of
+    return math.sqrt(Y ** 2 + X ** 2) > 2 + D  # working only for movement of
     # vesicule in OZ axes direction movement
 
 
@@ -250,17 +256,16 @@ def pre_roy(alpha, Z0, ry=0, rn=0):
         X = R0 * cos_a
         Y = R0 * sin_a
         Z = Z0
-
-        while stopper(X, Y, Z) and Z < N * delta * 1.2:
+        oX, oY, oZ = X, Y, Z
+        while stopper(X, Y, Z) and Z < 10:
+            oX, oY, oZ = X, Y, Z
             X, Y, Z = mover(X, Y, Z)
-
-        if Z > N * delta * 1.2:
+        # print(R0, math.fabs(Z - oZ), math.fabs(X - oX), math.fabs(Y - oY))    
+        if Z > 10  and math.fabs(Z - oZ) < 0.15 and  math.fabs(X - oX) < 0.15 and math.fabs(Y - oY) < 0.15:
             return R0, R_Yes
-
         else:
-
             R_Yes = R0
-            R0 = R0 * 1.34
+            R0 = R0 * 2
 
 
 @jit
@@ -282,14 +287,14 @@ def roy(alpha, Z0, ry=0, rn=0):
         X = R0 * cos_a
         Y = R0 * sin_a
         Z = Z0
-
-        while stopper(X, Y, Z) and Z < N * delta * 1.2:
+        oX, oY, oZ = X, Y, Z
+        while stopper(X, Y, Z) and Z < 10:
             # print(stopper(X, Y, Z), Z < N * delta * 1.2, X, Y, Z)
+            oX, oY, oZ = X, Y, Z
             X, Y, Z = mover(X, Y, Z)
-
-        if Z > N * delta * 1.2:
-            # print('R_No = R0')
-            R_No = R0
+        # print(R0, math.fabs(Z - oZ)) 
+        if Z > 10  and math.fabs(Z - oZ) < 0.15 and  math.fabs(X - oX) < 0.15 and math.fabs(Y - oY) < 0.15:
+            R_No = R0 
         else:
             # print('R_Yes = R0')
             R_Yes = R0  
@@ -329,7 +334,7 @@ def get_traectory(options):
     over_step_count = 0
     points = []
     X, Y, Z = options['coors'];
-    if (options['limit']):
+    if (not options['limit']):
         while True:
             point = {};
             point['COORS'] = mover(X, Y, Z)
@@ -341,13 +346,16 @@ def get_traectory(options):
             if Z > -1:
                 break
     else:            
-        for i in range(1000):
+        for i in range(options['limit']):
             if over_step_count > 10 or Z > 5 * delta * 1.2:
                 break
         # while stopper(X, Y, Z) and Z < N * delta * 1.2:
             point = {};
             point['COORS'] = mover(X, Y, Z)
             print(math.sqrt(  (point['COORS'][0] - X)**2 + (point['COORS'][1] - Y)**2 + (point['COORS'][2] - Z)**2   ))
+            if(math.sqrt(sum(map(lambda c: c**2, point['COORS'])))) < D + 1.5:
+                print('touch')
+                break
             if (math.sqrt(  (point['COORS'][0] - X)**2 + (point['COORS'][1] - Y)**2 + (point['COORS'][2] - Z)**2   )) > 5:
                 over_step_count+=1
                 continue
@@ -367,7 +375,7 @@ def set_params(params):
     global d_working_const
     d_working_const = {
         'chain': params['chain'],
-        'dimentions_count': params['dimentions_count'],
+        'dimensions_count': params['dimensions_count'],
         'dt': params['dt'],
         'cell_R': (params['cell_R'] / params['r0']) ,
         'diffusion_exp': params['diffusion_exp'],
@@ -381,11 +389,10 @@ def set_params(params):
         'showDetails': params['showDetails'],
         'normalDistribution': numpy.random.normal(0, 1)
     }
-    globals()['Z'] = -d_working_const['cell_R']#params['Z0']
+    globals()['Z'] =params['Z0'] #  -d_working_const['cell_R']
 
     set_constants(
-        Hox=params['Hox'],
-        Hoz=params['Hoz'],
+        Ho=-params['Ho'],
         r0=params['r0'] * 10 ** -7,
         R0=params['R0'] * 10 ** -7,
         ksi=10 ** (-1*params['ksi']),
@@ -408,5 +415,5 @@ def get_catching_distance_to_vesicule(params):
     R0, r0 = params['R0'], params['r0']
     catchR = sum(r) / len(r) - R0 / r0
     distanceToVesicule = round(catchR, 2) * r0
-    print(distanceToVesicule)
+    # print(distanceToVesicule)
     return distanceToVesicule

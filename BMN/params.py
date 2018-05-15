@@ -1,65 +1,22 @@
-PARAMS = [
-    {'DeltaR': [0.2]},
-    {'ZT': [0.1]},
-    {'Zlim': [20]},
-    {'Spow': [0.5]},
-    {'T': [0.1]},
-    {'A_RANGE': [[60]]},
-    {'Hox': [50]},
-    {'Hoz': [50]},
-    {'r0': [20]},
-    {'R0': [i * 20 for i in range(1, 20)]},
-    {'ksi': [2]},
-    {'Nu': [1.01 * 10 ** -2]},
-    {'N': [20]},
-    {'Mo': [477]},
-    {'V0': [2 * 10 ** -4]},
-    {'Z0': [-20]},
-    {'step': [1]},
-    {'showDetails': [False]}
-]
-
-PARAMS_FOR_TRAEKTORY = [
-    {'DeltaR': [0.2]},
-    {'ZT': [0.1]},
-    {'Zlim': [20]},
-    {'Spow': [0.5]},
-    {'T': [0.5]},
-    {'A_RANGE': [[60]]},
-    {'Hox': [0]},
-    {'Hoz': [0]},
-    {'r0': [50]},
-    {'R0': [200]},
-    {'ksi': [4]},
-    {'Nu': [1.01 * 10 ** -2]},
-    {'N': [50]},
-    {'Mo': [477]},
-    {'V0': [2 * 10 ** -4]},
-    {'Z0': [-20]},
-    {'step': [1]},
-    {'showDetails': [False]}
-]
-
 DEFAULT_PARAMS = {
-    'dimentions_count': 3,
+    'dimensions_count': 2,
     'dt': 0.1,
     'cell_R': 10000,
     'diffusion_exp': 0.8,
-    'DeltaR': 0.2,
+    'DeltaR': 0.01,
     'ZT': 0.1,
     'Zlim': 20,
     'Spow': 0.5,
     'T': 0.1,
     'A_RANGE': [60],
-    'Hox': -50,
-    'Hoz': -50,
+    'Ho': 7000,
     'r0': 50,
     'R0': 250,
-    'ksi': 2,
+    'ksi': 6,
     'Nu': 1.01 * 10 ** -2,
-    'N': 0,
+    'N': 5,
     'Mo': 477,
-    'V0': 500 * 10 ** -4,
+    'V0': 2 * 10 ** -4,
     'Z0': -20,
     'step': 1,
     'showDetails': False,
@@ -68,22 +25,18 @@ DEFAULT_PARAMS = {
 
 SERIES = [
     # Magnetic field - HIGH, vesicle sensitive - HIGH
-    {**DEFAULT_PARAMS,**{'Hox': -7000, 'Hoz': -7000, 'ksi': 2}},
+    # {**DEFAULT_PARAMS,**{'Ho': 7000, 'ksi': 2}},
     # Magnetic field - HIGH, vesicle sensitive - LOW
-    {**DEFAULT_PARAMS,**{'Hox': -7000, 'Hoz': -7000, 'ksi': 6}},
+    # {**DEFAULT_PARAMS,**{'Ho': 7000, 'ksi': 6}},
     # Magnetic field - LOW, vesicle sensitive - HIGH
-    {**DEFAULT_PARAMS,**{'Hox': -50, 'Hoz': -50, 'ksi': 2}},
+    {**DEFAULT_PARAMS,**{'Ho': 50, 'ksi': 2}}
     # Magnetic field - LOW, vesicle sensitive - LOW
-    {**DEFAULT_PARAMS,**{'Hox': -50, 'Hoz': -50, 'ksi': 6}},
+    # {**DEFAULT_PARAMS,**{'Ho': 50, 'ksi': 6}},
 ]    
 
 PARAMS_META_DATA = {
-    'Hox': {
+    'Ho': {
         'description': 'OX part of external \nmagnetic field',
-        'units': r'$ Gs$'
-    },
-    'Hoz': {
-        'description': 'OZ part of external \nmagnetic field',
         'units': r'$ Gs$'
     },
     'r0': {
@@ -119,9 +72,47 @@ PARAMS_META_DATA = {
         'units': r'$ nm$'
     }
 } 
+PARAMS_META_DATA_UA = {
+    'Ho': {
+        'description': 'Зовнішнє магнітне поле',
+        'units': r'$ Гс$'
+    },
+    'r0': {
+         'description': 'Радіус БМН',
+         'units': r'$ нм$'
+    },
+    'R0': {
+         'description': 'Радіус везикули',
+         'units': r'$ нм$'
+    },
+    'ksi': {
+         'description': 'Магнітна\nсприйнятливість\nвезикули',
+         'units': r'$ -\log(\chi)$'
+    },
+    'Nu':{
+         'description': 'Динамічна в\'язкість \nсередовища',
+         'units': r'$ \frac{г}{см с}$'
+    },
+    'N': {
+         'description': 'Кількість частинок\nу ланцюжку',
+         'units': r' шт'
+    },
+    'Mo': {
+         'description': 'Намагнічесність БМН',
+         'units': r''
+    },
+    'V0': {
+         'description': r'Швидкість везикули',
+         'units': r'$ \frac{см}{с}$'
+    },
+    'DISTANCE': {
+        'description': r'Розмір зони захоплення',
+        'units': r'$ нм$'
+    }
+} 
 
 def staticParamsDescription(exeptKeys):
-    paramsKeys = list(PARAMS_META_DATA.keys())
+    paramsKeys = list(PARAMS_META_DATA_UA.keys())
     paramsKeys = [key for key in paramsKeys if key not in exeptKeys]
     description = ""
     for key in paramsKeys:
@@ -132,4 +123,4 @@ def staticParamsDescription(exeptKeys):
 
 
 def getDescription(key, value=''):
-    return PARAMS_META_DATA[key]['description']+', {} '.format(value)+PARAMS_META_DATA[key]['units']
+    return PARAMS_META_DATA_UA[key]['description']+', {} '.format(value)+PARAMS_META_DATA_UA[key]['units']

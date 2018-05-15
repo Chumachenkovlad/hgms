@@ -18,15 +18,14 @@ def getParamsString(params):
 
 
 def runTraectoryExperiment():
-    paramsLists = lm.manageLists(PARAMS_FOR_TRAEKTORY)
-    # print('r0(nm)   R0(nm)  ksi(10^-)   N(pcls num) CatchingRadius(nm)')
+    START_Z = -40
     traectories = []
-    for R in [0, 3, 5, 7, 10, 15]:
+    for R in [0,  3,  5, 15, 30, 45, 60]:
         # resultString = getParamsString(params)
         chain.set_params(DEFAULT_PARAMS)
         options = {
-            'coors': (R, R, -40),
-            'limit': False
+            'coors': (R, R, START_Z),
+            'limit': 1000
         }
         dt = DEFAULT_PARAMS['dt']
         points = chain.get_traectory(options)
@@ -40,27 +39,25 @@ def runTraectoryExperiment():
 
         traectories.append({'x': x, 'y': y, 'z': z, 'R': R, 'DEFAULT_PARAMS': DEFAULT_PARAMS})
     drawer.draw3DTraectory(traectories);    
-    # drawer.drawTraectories(traectories)
-        # chain.run(params)
-        # resultString += '{}  '.format(chain.run(params))
-        # print(resultString)
 
 def runWalkingToChainExperiment(default_params):
     traectories = []
     dt = default_params['dt']
-    for N in [0, 1, 3, 7, 25]:
+    V0 = default_params['V0']
+    r0 = default_params['r0']
+    for N in [0, 1, 3, 5, 10]:
         chain.set_params({**default_params, **{
                     'N': N
                 }})
         options = {
-            'coors': (0, 0, -(default_params['cell_R'] / default_params['r0'])),
-            'limit': True
+            'coors': (0, 0, -(default_params['cell_R'] / r0)),
+            'limit': 0
         }
         points = chain.get_traectory(options)
 
         t = {
-            'x': [i*dt for i in range(len(points))],
-            'y': [default_params['cell_R']+points[i]['COORS'][2]*default_params['r0'] for i in range(len(points))],
+            'x': [i*dt*(V0/(r0*10**-7)) for i in range(len(points))],
+            'y': [default_params['cell_R']+points[i]['COORS'][2]*r0 for i in range(len(points))],
             **{'R': N}
         }
         traectories.append(t)
@@ -84,11 +81,12 @@ def plots_data(primary_params, secondary_params):
             params = {**DEFAULT_PARAMS, **{
                 primary_params['key']: primary_value,
                 secondary_params['key']: secondary_value
-            }}
+            }}    
             chain.set_params(params)
             distance = chain.get_catching_distance_to_vesicule(params)
             plot['y'].append(distance)
             plot['x'].append(primary_value)
+            print(secondary_value, primary_value, distance, sep="\t")
         plots.append(plot)    
     drawer.drawPlots(plots)
 
@@ -99,9 +97,9 @@ def runDistanceExperiment():
         plots_data(primary_params, secondary_params) 
     
 if __name__ == "__main__":
-    runDistanceExperiment()
+    # runDistanceExperiment()
     # runTraectoryExperiment()
-    # for params in SERIES:
-        # runWalkingToChainExperiment(params)
+    for params in SERIES:
+        runWalkingToChainExperiment(params)
         
 
