@@ -19,8 +19,9 @@ DEFAULT_PARAMS = {
     'V0': 2 * 10 ** -4,
     'Z0': -20,
     'step': 1,
-    'showDetails': False,
-    'chain': True
+    'show_details': False,
+    'chain': True,
+    'possible_direction': ['x', 'y', 'z']
     }
 
 SERIES = [

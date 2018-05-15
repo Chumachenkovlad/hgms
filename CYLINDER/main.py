@@ -25,7 +25,7 @@ PARAMS = [
         10 * 10 ** -4
     ]},
     {'Z0': [-30]},
-    {'showDetails': [False]}
+    {'show_details': [False]}
 ]
 
 

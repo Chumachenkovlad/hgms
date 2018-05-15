@@ -59,11 +59,15 @@ def set_constants(**kw):
     diffusion_exp = d_working_const['diffusion_exp']
     dimensions_count = d_working_const['dimensions_count']
 
+    T = (dt * r0/ V0)
+
     # deffusion data
     R_BOLTSMANA = 1.3806488 * 10 ** -16
     TEMP = 273 + 37
     DEFFUSION_CONST = R_BOLTSMANA * TEMP / (3 * pi * Nu * R0)
-    MSD_NORMAL_DISTRIBUTION_LIST = list(map(math.fabs, numpy.random.normal(0, dimensions_count * DEFFUSION_CONST * (dt * r0/ V0) ** diffusion_exp, 1000)))
+    MSD_NORMAL_DISTRIBUTION_LIST = list(map(math.fabs, 
+        numpy.random.normal(0, 
+            2 * dimensions_count * DEFFUSION_CONST * T ** diffusion_exp, 1000))) #2dDt^a
     RANDOM_VECTORS = [getRandomVector() for i in range(1000)]
     constants = {
         'N': N,
@@ -84,7 +88,7 @@ def getPointMSD():
     msd = random.choice(d_constants['MSD_NORMAL_DISTRIBUTION_LIST'])
     vector = random.choice(d_constants['RANDOM_VECTORS'])
     r0 = d_physical_const['r0']
-    x_shift, y_shift, z_shift = [msd * part / r0 for part in vector]
+    x_shift, y_shift, z_shift = [msd * projection / r0 for projection in vector]
     return x_shift, y_shift, z_shift
 
 @jit
@@ -190,6 +194,8 @@ def mover(X, Y, Z):
     RANDOM_VECTORS = d_constants['RANDOM_VECTORS']
     r0 = d_physical_const['r0']
     dt = d_working_const['dt']
+    possible_direction = d_working_const['possible_direction']
+    
 
     """
     calculate integral of gradient^2 by volume of vesicle
@@ -201,23 +207,19 @@ def mover(X, Y, Z):
     VY = gradHY * CB  # to each  VX,VY,VZ
     VZ = gradHZ * CB + 1 # to chenge direction of movement of vesicule
     """calculete elementary time size"""
-    # DT = T / (ZT * (1 + (VX * VX + VY * VY + VZ * VZ) ** Spow))
 
     deffusion_shift = random.choice(MSD_NORMAL_DISTRIBUTION_LIST)
     x_shift, y_shift, z_shift = getPointMSD()
 
     """calculate new coordinates of vesicle after moving DT time interval"""
+    if 'x' in possible_direction:
+        X += VX * dt + x_shift
+    if 'y' in possible_direction:
+        Y += VY * dt + y_shift
+    if 'z' in possible_direction:
+        Z += VZ * dt + z_shift
 
-    #X += VX * dt #+ x_shift
-   # Y += VY * dt #+ y_shift
-    Z += VZ * dt + z_shift
-    # print(VX * dt, x_shift)
-    # print(VY * dt, y_shift)
-    # print(VZ * dt, z_shift)
-    # print((X,Y,Z), (VX * dt, VY * dt, VZ * dt), (x_shift, y_shift, z_shift))
-    # print(math.sqrt(X ** 2 + Y ** 2), Z)
-    if d_working_const['showDetails']:
-        # current info of vesicule movement
+    if d_working_const['show_details']:
         print(math.sqrt(X ** 2 + Y ** 2), Z)
     return X, Y, Z
 
@@ -386,7 +388,8 @@ def set_params(params):
         'T':      params['T'],
         'V0': params['V0'],
         'step':   params['step'],
-        'showDetails': params['showDetails'],
+        'show_details': params['show_details'],
+        'possible_direction': params['possible_direction'],
         'normalDistribution': numpy.random.normal(0, 1)
     }
     globals()['Z'] =params['Z0'] #  -d_working_const['cell_R']

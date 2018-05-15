@@ -111,7 +111,7 @@ def mover(X, Y, Z):
     Y = Y + VY * DT
     Z = Z + VZ * DT
 
-    if d_working_const['showDetails']:
+    if d_working_const['show_details']:
         print(math.sqrt(X ** 2 + Y ** 2), Z, sep="\t")
 
     return X, Y, Z
@@ -245,7 +245,7 @@ def run(params):
         'Zlim': params['Zlim'],
         'Spow': params['Spow'],
         'T': params['T'],
-        'showDetails': params['showDetails']
+        'show_details': params['show_details']
     }
 
     set_constants(
