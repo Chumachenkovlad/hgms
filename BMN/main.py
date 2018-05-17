@@ -20,7 +20,7 @@ def getParamsString(params):
 def runTraectoryExperiment():
     START_Z = -40
     traectories = []
-    for R in [0,  3,  5, 15, 30, 45, 60]:
+    for R in [0, 5, 10, 20]:
         # resultString = getParamsString(params)
         chain.set_params(DEFAULT_PARAMS)
         options = {
@@ -45,9 +45,9 @@ def runWalkingToChainExperiment(default_params):
     dt = default_params['dt']
     V0 = default_params['V0']
     r0 = default_params['r0']
-    for N in [0, 1, 3, 5, 10]:
+    for N in [1 , 3, 5, 7]:
         chain.set_params({**default_params, **{
-                    'N': N
+                    'ksi': N
                 }})
         options = {
             'coors': (0, 0, -(default_params['cell_R'] / r0)),
@@ -98,8 +98,8 @@ def runDistanceExperiment():
     
 if __name__ == "__main__":
     # runDistanceExperiment()
-    # runTraectoryExperiment()
-    for params in SERIES:
-        runWalkingToChainExperiment(params)
+    runTraectoryExperiment()
+    # for params in SERIES:
+    #     runWalkingToChainExperiment(params)
         
 

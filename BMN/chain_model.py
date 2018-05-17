@@ -60,15 +60,15 @@ def set_constants(**kw):
     dimensions_count = d_working_const['dimensions_count']
 
     T = (dt * r0/ V0)
+    gamma = 6 * pi * Nu * R0
 
     # deffusion data
     R_BOLTSMANA = 1.3806488 * 10 ** -16
     TEMP = 273 + 37
-    DEFFUSION_CONST = R_BOLTSMANA * TEMP / (3 * pi * Nu * R0)
+    DEFFUSION_CONST = R_BOLTSMANA * TEMP / (gamma)
     MSD_NORMAL_DISTRIBUTION_LIST = list(map(math.fabs, 
-        numpy.random.normal(0, 
-            2 * dimensions_count * DEFFUSION_CONST * T ** diffusion_exp, 1000))) #2dDt^a
-    RANDOM_VECTORS = [getRandomVector() for i in range(1000)]
+        numpy.random.normal(0, math.sqrt(2 * dimensions_count * DEFFUSION_CONST * T ** diffusion_exp), 100000))) #2dDt^a
+    RANDOM_VECTORS = [getRandomVector() for i in range(100000)]
     constants = {
         'N': N,
         'CB': CB,
@@ -79,15 +79,17 @@ def set_constants(**kw):
         'D': R0 / r0,
         'DEFFUSION_CONST': DEFFUSION_CONST,
         'MSD_NORMAL_DISTRIBUTION_LIST': MSD_NORMAL_DISTRIBUTION_LIST,
-        'RANDOM_VECTORS': RANDOM_VECTORS
+        'RANDOM_VECTORS': RANDOM_VECTORS,
+        'gamma': gamma
     }
 
-    d_constants = {**d_constants, **constants}
+    d_constants = { **d_constants, **constants }
 
 def getPointMSD():
     msd = random.choice(d_constants['MSD_NORMAL_DISTRIBUTION_LIST'])
     vector = random.choice(d_constants['RANDOM_VECTORS'])
     r0 = d_physical_const['r0']
+    # print(msd)
     x_shift, y_shift, z_shift = [msd * projection / r0 for projection in vector]
     return x_shift, y_shift, z_shift
 

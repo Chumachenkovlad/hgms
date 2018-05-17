@@ -1,8 +1,8 @@
 DEFAULT_PARAMS = {
-    'dimensions_count': 2,
+    'dimensions_count': 3,
     'dt': 0.1,
     'cell_R': 10000,
-    'diffusion_exp': 0.8,
+    'diffusion_exp': 1,
     'DeltaR': 0.01,
     'ZT': 0.1,
     'Zlim': 20,
@@ -14,14 +14,14 @@ DEFAULT_PARAMS = {
     'R0': 250,
     'ksi': 6,
     'Nu': 1.01 * 10 ** -2,
-    'N': 5,
+    'N': 10,
     'Mo': 477,
-    'V0': 2 * 10 ** -4,
+    'V0': 500 * 10 ** -4,
     'Z0': -20,
     'step': 1,
     'show_details': False,
     'chain': True,
-    'possible_direction': ['x', 'y', 'z']
+    'possible_direction': 'xyz'
     }
 
 SERIES = [
@@ -47,7 +47,7 @@ PARAMS_META_DATA = {
     'R0': {
          'description': 'Vesicule radius',
          'units': r'$ nm$'
-    },
+    },''
     'ksi': {
          'description': 'Magnetic sensitiveness \nof vesicule',
          'units': r'$ -\log(\chi)$'

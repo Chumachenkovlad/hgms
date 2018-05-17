@@ -48,12 +48,12 @@ def drawWalkingToChain(traectories):
   setPlotStyles()
   for t in traectories:
     plotStyle = globals()['plotStyles'].pop()
-    plt.plot(t['x'], t['y'], plotStyle, markersize=2, label=t['R'])
+    plt.plot(t['x'], t['y'], plotStyle, markersize=1, label=t['R'])
   plt.legend(
     fontsize=20, 
     loc="upper left", 
     ncol=1 , 
-    title="Кількість частинок \nБМН у ланцюжку",
+    title="Магнітна\nсприйнятливість \nвезикули $ -\log(\chi)$",
     bbox_to_anchor=(1.05, 1)
     )
   plt.xlabel("Час подолання відстані, мкс")
